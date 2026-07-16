@@ -478,11 +478,13 @@
           <div class="contact-detail">Telegram <span>@novaclimate</span></div>
           <div class="contact-detail">Почта <span>info@example.com</span></div>
         </div>
-        <!-- ================= ФОРМА С ОТПРАВКОЙ В TELEGRAM ================= -->
-        <form id="contactForm">
-          <input type="text" id="name" placeholder="Ваше имя" required>
-          <input type="text" id="contact" placeholder="Телефон или Telegram" required>
-          <textarea id="message" placeholder="Опишите задачу (марка, модель, проблема)"></textarea>
+
+        <!-- ================= ФОРМА С ОТПРАВКОЙ НА ПОЧТУ (Web3Forms) ================= -->
+        <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="f29fe39f-1ace-497f-b03f-c6d2b76cacdd">
+          <input type="text" name="name" placeholder="Ваше имя" required>
+          <input type="text" name="contact" placeholder="Телефон или Telegram" required>
+          <textarea name="message" placeholder="Опишите задачу (марка, модель, проблема)"></textarea>
           <button type="submit" class="btn-primary">Отправить заявку</button>
         </form>
         <div id="formMsg" style="display:none; color:#5eead4; margin-top:12px; text-align:center;"></div>
@@ -502,50 +504,36 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
-<!-- ================= СКРИПТ ОТПРАВКИ В TELEGRAM ================= -->
+<!-- ================= СКРИПТ ОТПРАВКИ ЧЕРЕЗ Web3Forms ================= -->
 <script>
-// ⚠️ ЗАМЕНИ ЭТИ ДВЕ СТРОКИ НА СВОИ ДАННЫЕ ИЗ BOTFATHER И GETUPDATES
-const BOT_TOKEN = '8950335834:AAGl7jwdpMVmVIHvnwvvI1tBtKV3OZGRfg8';   // пример: '123456:ABC-DEF...'
-const CHAT_ID = '8950335834';         // пример: '987654321'
+const form = document.getElementById('contactForm');
+const msg = document.getElementById('formMsg');
 
-document.getElementById('contactForm').addEventListener('submit', async function(e) {
+form.addEventListener('submit', async function(e) {
   e.preventDefault();
-
-  const name = document.getElementById('name').value.trim();
-  const contact = document.getElementById('contact').value.trim();
-  const message = document.getElementById('message').value.trim();
-  const msgDiv = document.getElementById('formMsg');
-
-  const text = `🔔 Новая заявка с сайта!\n\n` +
-               `👤 Имя: ${name}\n` +
-               `📞 Контакт: ${contact}\n` +
-               `📝 Сообщение: ${message || 'не указано'}\n` +
-               `🕒 ${new Date().toLocaleString('ru-RU')}`;
+  const formData = new FormData(this);
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    const res = await fetch(this.action, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: text
-      })
+      body: formData
     });
 
     if (res.ok) {
-      msgDiv.style.display = 'block';
-      msgDiv.textContent = 'Спасибо! Заявка отправлена.';
+      msg.style.display = 'block';
+      msg.style.color = '#5eead4';
+      msg.textContent = 'Спасибо! Заявка отправлена.';
       this.reset();
     } else {
       throw new Error();
     }
   } catch {
-    msgDiv.style.display = 'block';
-    msgDiv.style.color = '#ff8a8a';
-    msgDiv.textContent = 'Ошибка отправки. Позвоните нам.';
+    msg.style.display = 'block';
+    msg.style.color = '#ff8a8a';
+    msg.textContent = 'Ошибка отправки. Позвоните нам.';
   }
 
-  setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+  setTimeout(() => { msg.style.display = 'none'; }, 5000);
 });
 </script>
 
